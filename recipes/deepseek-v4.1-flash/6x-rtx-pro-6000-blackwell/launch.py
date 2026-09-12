@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Launch the fixed six-GPU recipe; no server flags are silently overridden."""
+"""Launch a named six-GPU profile without overriding its server flags."""
 import argparse
 import json
 import os
@@ -31,7 +31,10 @@ def docker_command(args):
         raise ValueError("Docker bind paths cannot contain commas or newlines")
     if model == cache or model in cache.parents or cache in model.parents:
         raise ValueError("Model and writable cache paths must be separate directories")
-    profile = json.loads((HERE / "profile.json").read_text())
+    profiles = {"single": "profile.json", "parallel": "profile-parallel.json"}
+    if args.profile not in profiles:
+        raise ValueError("Choose the single or parallel profile")
+    profile = json.loads((HERE / profiles[args.profile]).read_text())
     selected = ",".join(uuids)
     cmd = ["docker", "run", "--detach", "--init", "--name", args.name,
            "--gpus", '"device=' + selected + '"',
@@ -53,7 +56,8 @@ def main():
     parser.add_argument("--gpus", required=True, help="Six full GPU UUIDs in TP-pair order")
     parser.add_argument("--model-dir", required=True)
     parser.add_argument("--cache-dir", required=True)
-    parser.add_argument("--image", default="llm-inference-recipes/deepseek-v41:2026-09-12")
+    parser.add_argument("--profile", choices=("single", "parallel"), default="single")
+    parser.add_argument("--image", default="llm-inference-recipes/deepseek-v41:2026-09-12-concurrent")
     parser.add_argument("--name", default="deepseek-v41-recipe")
     parser.add_argument("--port", type=int, default=30000)
     parser.add_argument("--dry-run", action="store_true")

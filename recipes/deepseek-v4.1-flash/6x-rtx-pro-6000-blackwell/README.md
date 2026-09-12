@@ -48,7 +48,7 @@ hf download deepseek-ai/DeepSeek-V4.1-Flash \
   --local-dir "$MODEL_DIR"
 
 docker build --platform linux/amd64 \
-  -t llm-inference-recipes/deepseek-v41:2026-09-12 "$RECIPE"
+  -t llm-inference-recipes/deepseek-v41:2026-09-12-concurrent "$RECIPE"
 ```
 
 Download/build require network access; the serving profile uses offline Hugging
@@ -169,7 +169,7 @@ Run CPU regressions **inside the built runtime**, one script at a time:
 for test in test_pp_cache test_pp_graph_tokens test_indexer_workspace test_indexer_multi_request test_b12x_zero_signs; do
   docker run --rm --entrypoint python3 \
     -e XDG_CACHE_HOME=/tmp/cache -e HF_HOME=/tmp/huggingface \
-    llm-inference-recipes/deepseek-v41:2026-09-12 \
+    llm-inference-recipes/deepseek-v41:2026-09-12-concurrent \
     "/opt/recipe/tests/$test.py" || exit 1
 done
 ```

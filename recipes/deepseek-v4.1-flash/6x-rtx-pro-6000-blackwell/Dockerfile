@@ -25,7 +25,7 @@ RUN python3 -m pip uninstall -y flashinfer-jit-cache flashinfer-cubin \
 COPY patches/apply_runtime_patches.py /opt/recipe/apply_runtime_patches.py
 RUN python3 /opt/recipe/apply_runtime_patches.py
 COPY --chmod=755 entrypoint.sh /opt/recipe/
-COPY gpu_preflight.py healthcheck.py profile.json /opt/recipe/
+COPY gpu_preflight.py healthcheck.py profile*.json /opt/recipe/
 COPY warmup.py /opt/recipe/warmup.py
 RUN python3 -m pip install --no-deps \
     'https://files.pythonhosted.org/packages/d2/bc/f28f6b3ade2522785f57caaebb2b02e35e7f189e647f47b0da8e7f581e36/b12x-1.3.0-py3-none-any.whl#sha256=c97d88635521a7fdd4f67717c1835a017d0dcea49d49cc7aa5b4299f290d19e3'

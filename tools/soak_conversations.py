@@ -177,12 +177,14 @@ def main():
                     {'role': 'user', 'content': f'Begin with exactly {marker} on its own line. '
                      'Then propose a detailed Python test suite for validation, missing inputs, '
                      'timeouts and retries. Show code and explain the assertions.'}])
-                answer, _ = chat(worker, cycle, 'tool_result', messages)
+                answer, _ = chat(worker, cycle, 'tool_result', messages,
+                                 tools=[tool], tool_choice='auto')
                 if not (answer.get('content') or '').lstrip().startswith(marker):
                     raise ValueError('Incorrect report marker: ' + repr(answer))
                 messages.extend([answer, {'role': 'user', 'content':
                     f'What was the report code returned by the tool? Reply with exactly {marker}.'}])
-                follow, _ = chat(worker, cycle, 'follow_up', messages, max_tokens=128)
+                follow, _ = chat(worker, cycle, 'follow_up', messages, max_tokens=128,
+                                 tools=[tool], tool_choice='auto')
                 if (follow.get('content') or '').strip() != marker:
                     raise ValueError('Incorrect follow-up marker: ' + repr(follow))
                 cycle += 1
