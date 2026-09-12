@@ -1,7 +1,8 @@
 # DeepSeek V4.1 Flash on six RTX PRO 6000 Blackwell GPUs
 
-Two text-only profiles for six 96 GB cards with PCIe x16 links: `single` allows
-one active request, and `parallel` allows up to **24 active requests**. Both keep
+Three profiles for six 96 GB cards with PCIe x16 links: `single` allows one
+active text request, `parallel` allows up to **24 active text requests**, and
+`vision` adds native image input with the same 24-request limit. All keep
 a **1,048,576-token per-request limit** and share the same fixed KV allocation.
 Weights and Engram remain on the GPUs; CPU weight offload is disabled.
 
@@ -11,7 +12,7 @@ These are separate measured cases, not a guarantee for every mixture. See the
 [concurrency results](benchmarks/concurrency.md) and the
 [earlier single-request tuning](benchmarks/README.md).
 
-Status: the underlying runtime/profile passed GPU qualification and a one-hour
+Status: the earlier text-only runtime/profile passed GPU qualification and a one-hour
 conversation soak on 2026-09-12. This
 portable Docker packaging was subsequently rebuilt and CPU checked. A fresh
 six-GPU run of the public launcher is not claimed. Its entrypoint, mounts,
@@ -56,7 +57,7 @@ hf download deepseek-ai/DeepSeek-V4.1-Flash \
   --local-dir "$MODEL_DIR"
 
 docker build --platform linux/amd64 \
-  -t llm-inference-recipes/deepseek-v41:2026-09-12-concurrent "$RECIPE"
+  -t llm-inference-recipes/deepseek-v41:2026-09-12-vision "$RECIPE"
 ```
 
 Download/build require network access; the serving profile uses offline Hugging
@@ -120,10 +121,13 @@ docker rm deepseek-v41-recipe
 
 ## Fixed runtime and settings
 
-The complete contracts are [profile.json](profile.json) for `single` and
-[profile-parallel.json](profile-parallel.json) for `parallel`. The launcher defaults
+The complete contracts are [profile.json](profile.json) for `single`,
+[profile-parallel.json](profile-parallel.json) for `parallel`, and
+[profile-vision.json](profile-vision.json) for `vision`. The launcher defaults
 to `single`; add `--profile parallel` to the launch or dry-run command to select
-24 active requests. Run one profile at a time on the same six GPUs.
+24 active requests, or `--profile vision` for text plus up to four images per
+request including history. See [vision qualification](benchmarks/vision.md).
+Run one profile at a time on the same six GPUs.
 
 | Setting | Value / reason |
 | --- | --- |
@@ -158,6 +162,8 @@ caches. Keep the distinction between storage and runtime offload explicit.
 [apply_runtime_patches.py](patches/apply_runtime_patches.py) refuses unexpected
 upstream file hashes. It implements these compatibility and memory fixes:
 
+- Vision tower and aligner allocated only on the first pipeline stage; later
+  stages skip their weights. Language-only profiles remain supported.
 - Current token counts on pipeline-parallel ordinary and CUDA graph paths.
 - Empty KV-cache group handling.
 - SM120 sparse-attention/indexer page-size compatibility, including FlashInfer's
@@ -177,10 +183,10 @@ See [upstream attribution](../../../THIRD_PARTY_NOTICES.md).
 Run CPU regressions **inside the built runtime**, one script at a time:
 
 ```sh
-for test in test_pp_cache test_pp_graph_tokens test_indexer_workspace test_indexer_multi_request test_b12x_zero_signs; do
+for test in test_pp_cache test_pp_graph_tokens test_indexer_workspace test_indexer_multi_request test_b12x_zero_signs test_pp_vision_tower; do
   docker run --rm --entrypoint python3 \
     -e XDG_CACHE_HOME=/tmp/cache -e HF_HOME=/tmp/huggingface \
-    llm-inference-recipes/deepseek-v41:2026-09-12-concurrent \
+    llm-inference-recipes/deepseek-v41:2026-09-12-vision \
     "/opt/recipe/tests/$test.py" || exit 1
 done
 ```
@@ -221,7 +227,8 @@ uses FP8 activations, while the compared Marlin path used BF16 activations.
 - Short-prompt TTFT increased: the final main run measured 0.313 s at 1K versus
   0.166 s baseline. A focused recheck measured 0.239 s. Long-prompt TTFT improved.
 - Concurrency consumes a shared cache budget. Allowing 24 active requests does
-  not provide 24 independent 1M contexts. Vision, speculative decoding and other
+  not provide 24 independent 1M contexts. The vision profile has separate
+  [bounded qualification](benchmarks/vision.md); speculative decoding and other
   GPU counts remain unqualified.
 - A changed driver, power cap, PCIe placement, dependency or kernel can change
   both speed and memory behavior. Re-run correctness and full-context checks

@@ -15,6 +15,30 @@ def patch(relative_path, expected_hash, before, after):
 
 
 patch(
+    'models/deepseek_v4_1/nvidia/vl_model.py',
+    'ab698e56c83a345ea73e41359cab79b5e484ccfc116ed131347d50cdfe896251',
+    '''        # The tower is always built; _mark_tower_model stubs it out
+        # (StageMissingLayer, weights skipped) when the image limit is 0.
+        with self._mark_tower_model(vllm_config, {"image"}):''',
+    '''        from contextlib import nullcontext
+
+        from vllm.distributed import get_pp_group
+        from vllm.model_executor.models.utils import StageMissingLayer, no_init_weights
+
+        # The runner only encodes images on PP0. Subsequent stages receive
+        # hidden states and raw token IDs; unused tower weights must not
+        # consume their scarce GPU memory. Keep the ordinary modality-zero
+        # handling and use the existing skipped-weight mechanism.
+        with (
+            self._mark_tower_model(vllm_config, {"image"}),
+            no_init_weights(self, lambda mod: StageMissingLayer("image_tower", mod))
+            if not get_pp_group().is_first_rank
+            else nullcontext(),
+        ):''',
+)
+
+
+patch(
     'v1/worker/gpu/cudagraph_utils.py',
     '211de2232fb71aeb761dedbd7fadb7e0832db9331eac6951a1eafb6d77f1be9c',
     '''                # Update for non-first PP ranks.
