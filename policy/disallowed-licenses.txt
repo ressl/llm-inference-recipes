@@ -1,0 +1,6 @@
+AGPL-1.0
+AGPL-1.0-only
+AGPL-1.0-or-later
+SSPL-1.0
+BUSL-1.1
+Commons-Clause

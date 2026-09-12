@@ -1,0 +1,21 @@
+name: Recipe report
+description: Report a reproducible problem or propose a measured recipe.
+body:
+  - type: textarea
+    attributes:
+      label: Model, recipe and revision
+      description: Include checkpoint and runtime pins.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Hardware and software
+      description: GPU count, model, VRAM, PCIe topology, driver, OS and serving backend.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction and results
+      description: Include commands, expected behavior, actual behavior and per-run metrics. Remove secrets and private infrastructure details.
+    validations:
+      required: true
