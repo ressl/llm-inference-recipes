@@ -1,12 +1,18 @@
 # DeepSeek V4.1 Flash on six RTX PRO 6000 Blackwell GPUs
 
-A text-only, single-request configuration for six 96 GB cards with PCIe x16
-links. The qualified runtime reached approximately **103–105 decode tokens/s**
-and passed an exact **1,048,576-token total context** test. Weights and Engram
-remain on the GPUs; CPU weight offload is disabled. See the
-[measurements and limitations](benchmarks/README.md) before reproducing it.
+Two text-only profiles for six 96 GB cards with PCIe x16 links: `single` allows
+one active request, and `parallel` allows up to **24 active requests**. Both keep
+a **1,048,576-token per-request limit** and share the same fixed KV allocation.
+Weights and Engram remain on the GPUs; CPU weight offload is disabled.
 
-Status: the underlying runtime/profile was GPU qualified on 2026-09-12. This
+The parallel profile passes **24 independent 32K**, **eight independent 128K**
+and **four independent 256K** input contexts, with 1,024 output tokens per stream.
+These are separate measured cases, not a guarantee for every mixture. See the
+[concurrency results](benchmarks/concurrency.md) and the
+[earlier single-request tuning](benchmarks/README.md).
+
+Status: the underlying runtime/profile passed GPU qualification and a one-hour
+conversation soak on 2026-09-12. This
 portable Docker packaging was subsequently rebuilt and CPU checked. A fresh
 six-GPU run of the public launcher is not claimed. Its entrypoint, mounts,
 user permissions and readiness handling replace the original deployment wrapper.
@@ -112,7 +118,10 @@ docker rm deepseek-v41-recipe
 
 ## Fixed runtime and settings
 
-The complete argument/environment contract is in [profile.json](profile.json).
+The complete contracts are [profile.json](profile.json) for `single` and
+[profile-parallel.json](profile-parallel.json) for `parallel`. The launcher defaults
+to `single`; add `--profile parallel` to the launch or dry-run command to select
+24 active requests. Run one profile at a time on the same six GPUs.
 
 | Setting | Value / reason |
 | --- | --- |
@@ -122,11 +131,11 @@ The complete argument/environment contract is in [profile.json](profile.json).
 | FlashInfer | [c05407ceffb7d9ce111a73553a8e37ad752adb62](https://github.com/flashinfer-ai/flashinfer/tree/c05407ceffb7d9ce111a73553a8e37ad752adb62), built as 0.7.0 |
 | B12X | 1.3.0, wheel SHA-256 `c97d88635521a7fdd4f67717c1835a017d0dcea49d49cc7aa5b4299f290d19e3` |
 | Parallelism | TP2 × PP3; layer partition `8,12,20` |
-| Concurrency / context | 1 active sequence; 1,048,576 input + output tokens combined |
+| Concurrency / context | `single`: 1 active sequence; `parallel`: up to 24; 1,048,576 input + output tokens per request, sharing one cache pool |
 | Weight / Engram offload | `--cpu-offload-gb 0`; Engram `cpu_offload=false` |
 | KV / indexer budget | FP8 KV, fixed 1,932,735,283 bytes per worker; indexer logits 128 MiB |
 | Prefill | 1,536 batched tokens |
-| Graphs | `FULL_DECODE_ONLY`, capture size 1, compilation mode 0 |
+| Graphs | `FULL_DECODE_ONLY`, compilation mode 0; `single`: size 1; `parallel`: sizes 1, 2, 4, 8, 16, 24 |
 | Linear / expert kernels | B12X / B12X |
 | Collectives | NCCL P2P allowed through PHB; FlashInfer PCIe IPC; legacy custom all-reduce disabled |
 | Allocator | `expandable_segments:True` |
@@ -190,8 +199,9 @@ python3 tools/benchmark_vllm.py \
 The original German arithmetic, reasoning, tool and synthetic-record prompts
 are retained to reproduce the qualification workload. The 1M test forces 128
 output tokens and verifies all three records and exact API usage; it is not a
-general language-quality evaluation. It occupies the only request slot for
-roughly three minutes on the measured system.
+general language-quality evaluation. It uses nearly all of the shared KV pool for
+roughly three minutes on the measured system; competing requests can wait or
+be preempted when their combined cache demand is too large.
 
 The [PCIe graph replay probe](benchmarks/qualify_pcie_graph.py) and
 [dense-kernel microbenchmark](benchmarks/benchmark_mxfp8.py) are separate opt-in
@@ -208,8 +218,9 @@ uses FP8 activations, while the compared Marlin path used BF16 activations.
   failures. It was rejected despite passing a context test. Keep 1,536 here.
 - Short-prompt TTFT increased: the final main run measured 0.313 s at 1K versus
   0.166 s baseline. A focused recheck measured 0.239 s. Long-prompt TTFT improved.
-- This is a text-only recipe with one active request; throughput under multiple
-  clients, vision, speculative decoding and other GPU counts are unqualified.
+- Concurrency consumes a shared cache budget. Allowing 24 active requests does
+  not provide 24 independent 1M contexts. Vision, speculative decoding and other
+  GPU counts remain unqualified.
 - A changed driver, power cap, PCIe placement, dependency or kernel can change
   both speed and memory behavior. Re-run correctness and full-context checks
   before accepting new benchmark results.
