@@ -6,6 +6,8 @@ import urllib.request
 BASE = 'http://127.0.0.1:30000'
 MODEL = 'deepseek-ai/DeepSeek-V4.1-Flash'
 # The container health check retries while the API is loading.
+# Fixed container-loopback endpoint; no user-controlled URL or external transport.
+# nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected, python.lang.security.audit.insecure-transport.urllib.insecure-urlopen.insecure-urlopen
 with urllib.request.urlopen(BASE + '/health', timeout=5) as response:
     assert response.status == 200
 
@@ -15,6 +17,8 @@ def post(path, body):
         BASE + path, data=json.dumps(body).encode(),
         headers={'Content-Type': 'application/json'},
     )
+    # BASE is fixed loopback; both callers below supply literal API paths.
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
     with urllib.request.urlopen(request, timeout=180) as response:
         return json.load(response)
 

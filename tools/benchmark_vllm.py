@@ -96,9 +96,13 @@ def main():
     def post(path, body):
         request = urllib.request.Request(base + path, data=json.dumps(body).encode(),
                                          headers={"Content-Type": "application/json"})
+        # Operator-selected CLI endpoint, constrained above to HTTP(S).
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         return urllib.request.urlopen(request, timeout=600)
 
     def metrics():
+        # Same validated HTTP(S) endpoint; path is fixed, no file:// input.
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         with urllib.request.urlopen(base + "/metrics", timeout=20) as response:
             return response.read().decode()
 
