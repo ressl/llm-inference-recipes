@@ -24,8 +24,10 @@ user permissions and readiness handling replace the original deployment wrapper.
 - Six available **RTX PRO 6000 Blackwell 96 GB** GPUs, each reporting a current
   x16 link. Select three suitable two-GPU TP pairs on one NUMA node, with working
   PCIe peer access. Review the [P2P guide](../../../docs/pcie-p2p.md).
-- The measured system used driver **615.71.09**, kernel **7.0.0-31-generic**, four
-  600 W and two 350 W GPU power limits. Other drivers/topologies need validation.
+- The measured system used driver **615.71.09** and kernel **7.0.0-31-generic**.
+  Original qualification used four 600 W and two 350 W GPU power limits;
+  a separate [600 W follow-up](benchmarks/power-600w.md) records the later change.
+  Other drivers/topologies need validation.
 - The checkpoint's 48 safetensors files total **510,296,708,312 bytes**. Engram's
   203,073,077,576 bytes are included in that total. Plan at least 650 GB of space
   for the model and writable caches, plus separate Docker build/image storage.
