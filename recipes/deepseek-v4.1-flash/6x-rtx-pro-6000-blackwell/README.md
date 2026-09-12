@@ -151,7 +151,11 @@ upstream file hashes. It implements these compatibility and memory fixes:
 - Empty KV-cache group handling.
 - SM120 sparse-attention/indexer page-size compatibility, including FlashInfer's
   missing secondary-size-32 dispatch and separate physical indexer pages.
-- Bounded workspace for one full-context request.
+- Indexer workspace bounded to one full-context request's gathered keys.
+  Multiple prefills are partitioned into request/query chunks; the splitter
+  respects the smaller physical buffer of compressed caches. Other models
+  retain upstream sizing. This bound controls temporary workspace, not total
+  persistent KV capacity.
 - Chunked packed MXFP4 zero-sign normalization in vLLM's B12X adapter. It avoids
   a whole-tensor temporary during model loading. Full-size GPU validation used
   a 2,264,924,160-byte packed tensor with 58,982,400 bytes of peak extra allocation.
@@ -162,7 +166,7 @@ See [upstream attribution](../../../THIRD_PARTY_NOTICES.md).
 Run CPU regressions **inside the built runtime**, one script at a time:
 
 ```sh
-for test in test_pp_cache test_pp_graph_tokens test_indexer_workspace test_b12x_zero_signs; do
+for test in test_pp_cache test_pp_graph_tokens test_indexer_workspace test_indexer_multi_request test_b12x_zero_signs; do
   docker run --rm --entrypoint python3 \
     -e XDG_CACHE_HOME=/tmp/cache -e HF_HOME=/tmp/huggingface \
     llm-inference-recipes/deepseek-v41:2026-09-12 \
