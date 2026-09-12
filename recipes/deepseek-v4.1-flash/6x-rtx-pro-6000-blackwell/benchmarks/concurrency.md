@@ -6,6 +6,10 @@ B12X kernels and FlashInfer PCIe IPC. It raises the active-request limit to 24
 and captures decode graphs for 1, 2, 4, 8, 16 and 24 requests. The six selected
 96 GB cards all use PCIe x16. CPU weight and Engram offload stay disabled.
 
+These measurements use four 600 W and two 350 W GPU power limits. See the
+separate [600 W follow-up](power-600w.md) for the subsequent power change;
+it does not replace the measurements or soak below.
+
 The roughly **1,164,421-token KV capacity is shared**, while **1,048,576 is the
 per-request input-plus-output limit**. Increasing the active-request limit does
 not multiply the cache. The original [single profile](../profile.json) remains
