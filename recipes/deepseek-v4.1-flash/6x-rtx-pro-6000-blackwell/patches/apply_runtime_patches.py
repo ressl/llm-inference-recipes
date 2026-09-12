@@ -128,17 +128,34 @@ patch(
     'v1/attention/backends/mla/indexer.py',
     'd611939c7e4d35b28283831d50c33df9097489ee8b521c836dcd7650e8854f73',
     '    return max_model_len * 40',
-    """    # A single scheduled request cannot gather more than max_model_len
-    # index keys. The upstream 40-request workspace wastes several GiB at
-    # 1M context. Use the same bound for metadata splitting and profiling;
-    # compression is applied by their callers. Keep other profiles unchanged.
+    """    # Process arbitrarily many requests in bounded request/query chunks.
+    # One complete request must fit, but their aggregate context need not fit
+    # simultaneously in this gathered-key workspace. The metadata splitter
+    # must use the same physical capacity after KV compression.
     if (
         getattr(vllm_config.model_config.hf_config, "model_type", None)
         == "deepseek_v41"
-        and vllm_config.scheduler_config.max_num_seqs == 1
     ):
         return max_model_len
     return max_model_len * 40""",
+)
+
+
+patch(
+    'v1/attention/backends/mla/indexer.py',
+    'ca2a61583028eda860aa4e978a830bf4f6cbd95a6b25e81a3fc819d7bb2e986f',
+    """                self.max_prefill_buffer_size,
+                max_logits_bytes,""",
+    """                # V4.1 allocates gathered keys after compression; enforce
+                # that physical bound across multiple prefill requests.
+                (
+                    self.max_prefill_buffer_size // self.compress_ratio
+                    if getattr(
+                        self.vllm_config.model_config.hf_config, "model_type", None
+                    ) == "deepseek_v41"
+                    else self.max_prefill_buffer_size
+                ),
+                max_logits_bytes,""",
 )
 
 # Native V4.1 expert matrices exceed 2 GiB. Normalize zero signs in bounded

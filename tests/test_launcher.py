@@ -50,7 +50,8 @@ class LauncherTests(unittest.TestCase):
             for name in ["config.json", "model.safetensors.index.json"]:
                 (model / name).write_text("{}")
             args = argparse.Namespace(gpus=",".join(GPUS), port=30000, model_dir=str(model),
-                                      cache_dir=str(root / "cache"), name="recipe", image="recipe:test")
+                                      cache_dir=str(root / "cache"), name="recipe", image="recipe:test",
+                                      profile="single")
             cmd, cache = launch.docker_command(args)
             self.assertIn(f"type=bind,src={model},dst=/models,readonly", cmd)
             self.assertEqual('"device=' + args.gpus + '"', cmd[cmd.index("--gpus") + 1])
@@ -59,6 +60,16 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual("1048576", cmd[cmd.index("--max-model-len") + 1])
             self.assertEqual("0", cmd[cmd.index("--cpu-offload-gb") + 1])
             self.assertFalse(cache.exists(), "Dry command generation must not create directories")
+            args.profile = "parallel"
+            parallel, _ = launch.docker_command(args)
+            self.assertEqual("24", parallel[parallel.index("--max-num-seqs") + 1])
+            self.assertEqual("1048576", parallel[parallel.index("--max-model-len") + 1])
+            graphs = json.loads(parallel[parallel.index("--compilation-config") + 1])
+            self.assertEqual([1, 2, 4, 8, 16, 24], graphs["cudagraph_capture_sizes"])
+            args.profile = "../profile"
+            with self.assertRaises(ValueError):
+                launch.docker_command(args)
+            args.profile = "single"
             args.cache_dir = str(model / "cache")
             with self.assertRaises(ValueError):
                 launch.docker_command(args)

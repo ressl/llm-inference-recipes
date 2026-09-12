@@ -18,7 +18,7 @@ for path in root.rglob("*.md"):
         destination = (path.parent / target.split("#", 1)[0]).resolve()
         if not destination.is_relative_to(root) or not destination.exists():
             raise ValueError(f"Broken or escaping local link in {path.relative_to(root)}: {target}")
-for path in root.glob("recipes/*/*/profile.json"):
+for path in root.glob("recipes/*/*/profile*.json"):
     profile = json.loads(path.read_text())
     if not re.fullmatch(r"[0-9a-f]{40}", profile["revision"]):
         raise ValueError(f"Unpinned checkpoint: {path}")

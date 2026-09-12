@@ -9,12 +9,14 @@ can be added without changing the scope of the project.
 
 | Model | Hardware | Backend | Measured result |
 | --- | --- | --- | --- |
-| [DeepSeek V4.1 Flash](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/README.md) | 6 × RTX PRO 6000 Blackwell 96 GB, PCIe x16 | Patched, pinned vLLM; TP2 × PP3 | Approximately 103–105 decode tokens/s; 1,048,576 total context tokens; one request at a time |
+| [DeepSeek V4.1 Flash](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/README.md) | 6 × RTX PRO 6000 Blackwell 96 GB, PCIe x16 | Patched, pinned vLLM; TP2 × PP3 | 24 independent 32K requests active together; approximately 104 decode tokens/s for one stream; 1M per-request context limit with a shared KV pool |
 
-The first recipe keeps weights and Engram on the GPUs. Its full-context check
-used 1,048,448 input tokens plus 128 output tokens and completed in 170 seconds.
+The first recipe keeps weights and Engram on the GPUs. Its parallel profile also
+passes eight independent 128K histories and four independent 256K histories.
+A single full-context check used 1,048,448 input tokens plus 128 output tokens
+and completed in 172 seconds with the 24-request limit enabled.
 These are measurements from one six-GPU system, not a throughput or quality
-guarantee. Read the [results and limitations](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/README.md)
+guarantee. Read the [concurrency results and limits](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/concurrency.md)
 before choosing the profile.
 
 ## Start here

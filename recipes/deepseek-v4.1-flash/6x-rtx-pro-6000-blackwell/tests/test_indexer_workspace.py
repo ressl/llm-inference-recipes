@@ -26,7 +26,7 @@ def config(model_type='deepseek_v41', sequences=1):
 
 
 assert workspace(config()) == 1048576, 'Do not reserve 40 requests for one request'
-assert workspace(config(sequences=2)) == 40 * 1048576
+assert workspace(config(sequences=2)) == 1048576
 assert workspace(config(model_type='deepseek_v32')) == 40 * 1048576
 
 for budget_mb in (128, 512):
