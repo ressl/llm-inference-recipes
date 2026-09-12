@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+models/
+cache/
+results/
+*.safetensors
+*.gguf
+*.log
+.DS_Store
