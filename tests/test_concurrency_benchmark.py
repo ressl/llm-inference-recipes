@@ -19,6 +19,16 @@ def metrics(requests, tokens, hits=0, preemptions=0):
 
 
 class ConcurrentBenchmarkTests(unittest.TestCase):
+    def test_seed_reproduces_inputs_but_requests_remain_distinct(self):
+        first = benchmark.fixture_ids(42, 24, False)
+        self.assertEqual(first, benchmark.fixture_ids(42, 24, False))
+        self.assertNotEqual(first, benchmark.fixture_ids(43, 24, False))
+        self.assertEqual(24, len({marker for marker, _ in first}))
+        self.assertEqual(24, len({prefix for _, prefix in first}))
+        shared = benchmark.fixture_ids(42, 24, True)
+        self.assertEqual(1, len({prefix for _, prefix in shared}))
+        self.assertEqual(24, len({marker for marker, _ in shared}))
+
     def test_exact_group_usage_and_uncached_contract(self):
         before = metrics(10, 1000)
         result = benchmark.validate_group(before, metrics(14, 3048), 'test', 4, 512, False)

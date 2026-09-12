@@ -182,7 +182,8 @@ def main():
                 if not (answer.get('content') or '').lstrip().startswith(marker):
                     raise ValueError('Incorrect report marker: ' + repr(answer))
                 messages.extend([answer, {'role': 'user', 'content':
-                    f'What was the report code returned by the tool? Reply with exactly {marker}.'}])
+                    'What was the report_code returned by get_test_report? '
+                    'Reply with exactly that code and no other text.'}])
                 follow, _ = chat(worker, cycle, 'follow_up', messages, max_tokens=128,
                                  tools=[tool], tool_choice='auto')
                 if (follow.get('content') or '').strip() != marker:

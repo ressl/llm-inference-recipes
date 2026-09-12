@@ -2,8 +2,10 @@
 """Concurrent vLLM streams with request markers and sampled running/queued counts."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+import hashlib
 import json
 from pathlib import Path
+import random
 import re
 import statistics
 import threading
@@ -12,6 +14,16 @@ import urllib.request
 import uuid
 
 from benchmark_vllm import consume_stream, counters
+
+
+def fixture_ids(seed, concurrency, shared):
+    generator = random.Random(seed) if seed is not None else None
+    def identifier():
+        return (f'{generator.getrandbits(128):032x}' if generator is not None
+                else uuid.uuid4().hex)
+    group = identifier()
+    return [('REQUEST_' + identifier()[:16], group if shared else identifier())
+            for _ in range(concurrency)]
 
 
 def metric(raw, name, model):
@@ -48,6 +60,8 @@ def main():
     parser.add_argument('--prompt-tokens', type=int, default=32768)
     parser.add_argument('--output-tokens', type=int, default=512)
     parser.add_argument('--shared-prefix', action='store_true')
+    parser.add_argument('--fixture-seed', type=int,
+                        help='Repeat identical inputs; use a fresh vLLM cache salt per group')
     parser.add_argument('--output-dir', type=Path, required=True)
     args = parser.parse_args()
     if not args.url.startswith(('http://', 'https://')):
@@ -70,11 +84,12 @@ def main():
         with urllib.request.urlopen(base + '/metrics', timeout=10) as response:
             return response.read().decode()
 
-    group = uuid.uuid4().hex
+    # Salting avoids accidental prefix reuse across runs of the same fixture.
+    # Keep this salt private; it is not part of the model-visible prompt.
+    cache_options = ({'cache_salt': uuid.uuid4().hex + uuid.uuid4().hex}
+                     if args.fixture_seed is not None else {})
     prompts = []
-    for index in range(args.concurrency):
-        marker = 'REQUEST_' + uuid.uuid4().hex[:16]
-        prefix = group if args.shared_prefix else uuid.uuid4().hex
+    for marker, prefix in fixture_ids(args.fixture_seed, args.concurrency, args.shared_prefix):
         text = ('Benchmark ' + prefix + '\nReference notes:\n'
                 + 'A service accepts requests and records a status value for each operation.\n'
                 * (args.prompt_tokens // 8 + 100)
@@ -91,7 +106,8 @@ def main():
         prompts.append((marker, ids[:args.prompt_tokens - 128] + ids[-128:]))
     if args.shared_prefix:
         with post('/v1/completions', {'model': args.model, 'prompt': prompts[0][1],
-                  'max_tokens': 64, 'ignore_eos': True, 'temperature': 0}) as response:
+                  'max_tokens': 64, 'ignore_eos': True, 'temperature': 0,
+                  **cache_options}) as response:
             warmup = json.load(response)
         (args.output_dir / 'prefix-warmup.json').write_text(json.dumps(warmup, indent=2))
 
@@ -128,12 +144,13 @@ def main():
         with post('/v1/completions', {'model': args.model, 'prompt': ids,
                   'max_tokens': args.output_tokens, 'temperature': 0,
                   'ignore_eos': True, 'stream': True,
-                  'stream_options': {'include_usage': True}}) as response:
+                  'stream_options': {'include_usage': True}, **cache_options}) as response:
             result = consume_stream(collect(response), started, args.prompt_tokens, args.output_tokens)
         text = ''.join(output_text)
         if not text.lstrip().startswith(marker):
             raise ValueError('Missing or incorrect per-request marker: ' + repr(text[:100]))
-        return {'marker': marker, **result}
+        return {'marker': marker, 'response_sha256': hashlib.sha256(text.encode()).hexdigest(),
+                **result}
 
     sampler = threading.Thread(target=sample, daemon=True)
     sampler.start()
@@ -155,6 +172,7 @@ def main():
         raise ValueError('Metrics sampling incomplete: ' + repr(errors))
     summary = {'concurrency': args.concurrency, 'prompt_tokens': args.prompt_tokens,
                'output_tokens': args.output_tokens, 'shared_prefix': args.shared_prefix,
+               'fixture_seed': args.fixture_seed,
                'elapsed_s': elapsed,
                'aggregate_output_tokens_per_second': args.concurrency * args.output_tokens / elapsed,
                'median_stream_decode_tokens_per_second': statistics.median(r['decode_tokens_per_second'] for r in results),

@@ -84,6 +84,14 @@ Aggregate output rate includes the entire group's prefill and decode wall time.
 Per-stream decode rate can include pauses caused by other clients' prefills.
 It is not the same as dividing aggregate throughput by configured concurrency.
 
+For controlled repeats, set `--fixture-seed 42`. This reproduces model-visible
+prompts and request markers while a fresh, unreported vLLM `cache_salt` prevents
+reuse across timed groups. The endpoint must support that request field. Response
+hashes help distinguish output/workload variation from runtime variation; seeded
+inputs and temperature zero do not guarantee identical batched floating-point
+results. Keep the seed, concurrency and token lengths the same when comparing
+repeats.
+
 ## Conversation soak
 
 [soak_conversations.py](../tools/soak_conversations.py) repeatedly exercises a
