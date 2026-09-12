@@ -17,7 +17,9 @@ A single full-context check used 1,048,448 input tokens plus 128 output tokens
 and completed in 172 seconds with the 24-request limit enabled.
 These are measurements from one six-GPU system, not a throughput or quality
 guarantee. Read the [concurrency results and limits](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/concurrency.md)
-before choosing the profile.
+before choosing the profile. A separate [native vision profile](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/vision.md)
+now supports up to four images per request while retaining the same KV pool
+and 1M context limit.
 
 ## Start here
 

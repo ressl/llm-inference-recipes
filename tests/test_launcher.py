@@ -66,6 +66,13 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual("1048576", parallel[parallel.index("--max-model-len") + 1])
             graphs = json.loads(parallel[parallel.index("--compilation-config") + 1])
             self.assertEqual([1, 2, 4, 8, 16, 24], graphs["cudagraph_capture_sizes"])
+            args.profile = "vision"
+            vision, _ = launch.docker_command(args)
+            self.assertNotIn("--language-model-only", vision)
+            self.assertEqual({"image": 4}, json.loads(vision[vision.index("--limit-mm-per-prompt") + 1]))
+            self.assertEqual("weights", vision[vision.index("--mm-encoder-tp-mode") + 1])
+            self.assertEqual("24", vision[vision.index("--max-num-seqs") + 1])
+            self.assertEqual("1932735283", vision[vision.index("--kv-cache-memory-bytes") + 1])
             args.profile = "../profile"
             with self.assertRaises(ValueError):
                 launch.docker_command(args)

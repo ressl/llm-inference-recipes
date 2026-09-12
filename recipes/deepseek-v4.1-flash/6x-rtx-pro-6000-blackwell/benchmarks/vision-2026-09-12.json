@@ -1,0 +1,463 @@
+{
+  "date": "2026-09-12",
+  "profile": "vision",
+  "runtime_patch_sha256": "b6e5b17fac5498a297d7d038349460c7396c9d63e36710f5b96097ab7e196a46",
+  "profile_sha256": "24683b8d2bf151ddbbedbcfe49be539e3a0310afce6bad807d40fa570da58e9e",
+  "gpu_count": 6,
+  "power_limit_watts_per_gpu": 600,
+  "kv_cache_tokens": 1164421,
+  "max_model_len": 1048576,
+  "max_num_seqs": 24,
+  "max_images_per_request": 4,
+  "encoder_tp_mode": "weights",
+  "cases": [
+    {
+      "name": "single_image",
+      "status": 200,
+      "seconds": 0.8621586658991873,
+      "case": null,
+      "content": "Links ist ein roter Kreis, rechts ein blaues Quadrat. Der Code lautet RABE-5831.",
+      "usage": {
+        "prompt_tokens": 877,
+        "total_tokens": 903,
+        "completion_tokens": 26,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "image_followup",
+      "status": 200,
+      "seconds": 0.29481258313171566,
+      "case": null,
+      "content": "Blau",
+      "usage": {
+        "prompt_tokens": 924,
+        "total_tokens": 927,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "four_images",
+      "status": 200,
+      "seconds": 1.2194982501678169,
+      "case": null,
+      "content": "RABE-5831\nRABE-5832\nRABE-5833\nRABE-5834",
+      "usage": {
+        "prompt_tokens": 2935,
+        "total_tokens": 2963,
+        "completion_tokens": 28,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "five_images_rejected",
+      "status": 400,
+      "seconds": 0.04685716703534126,
+      "case": null,
+      "content": null,
+      "usage": null
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.141806042054668,
+      "case": 0,
+      "content": "1700",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 5.47519995784387,
+      "case": 1,
+      "content": "RABE-5932",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 0.8349078330211341,
+      "case": 2,
+      "content": "1702",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 5.768599458038807,
+      "case": 3,
+      "content": "RABE-5934",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.1428626249544322,
+      "case": 4,
+      "content": "1704",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 5.177579208044335,
+      "case": 5,
+      "content": "RABE-5936",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.14253258286044,
+      "case": 6,
+      "content": "1706",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 4.875480709131807,
+      "case": 7,
+      "content": "RABE-5938",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.141516292002052,
+      "case": 8,
+      "content": "1708",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 6.051468624966219,
+      "case": 9,
+      "content": "RABE-5940",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.1405525410082191,
+      "case": 10,
+      "content": "1710",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 6.642876625061035,
+      "case": 11,
+      "content": "RABE-5942",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.1399635828565806,
+      "case": 12,
+      "content": "1712",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 6.429488040972501,
+      "case": 13,
+      "content": "RABE-5944",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.1370076250750571,
+      "case": 14,
+      "content": "1714",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 6.9237227907869965,
+      "case": 15,
+      "content": "RABE-5946",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.1379995001479983,
+      "case": 16,
+      "content": "1716",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 6.943466708995402,
+      "case": 17,
+      "content": "RABE-5948",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.134593082824722,
+      "case": 18,
+      "content": "1718",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 7.009997250046581,
+      "case": 19,
+      "content": "RABE-5950",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.1366802081465721,
+      "case": 20,
+      "content": "1720",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 6.96962650003843,
+      "case": 21,
+      "content": "RABE-5952",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 1.1362706248182803,
+      "case": 22,
+      "content": "1722",
+      "usage": {
+        "prompt_tokens": 23,
+        "total_tokens": 26,
+        "completion_tokens": 3,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "name": "mixed_concurrency",
+      "status": 200,
+      "seconds": 6.989081999985501,
+      "case": 23,
+      "content": "RABE-5954",
+      "usage": {
+        "prompt_tokens": 857,
+        "total_tokens": 864,
+        "completion_tokens": 7,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    }
+  ],
+  "exact_context": {
+    "input_tokens": 1048448,
+    "output_tokens": 128,
+    "seconds": 131.11956641590223,
+    "three_record_recall_passed": true
+  },
+  "memory_note": "Post-qualification snapshot: 433 MiB minimum free on selected GPUs; not a sampled peak. Two recovered allocator mapping retries during startup, none seen during these serving tests.",
+  "qualification_scope": "Real checkpoint and runtime on six GPUs; public Docker wrapper separately built and CPU checked. No new long-duration vision soak or general visual benchmark."
+}
