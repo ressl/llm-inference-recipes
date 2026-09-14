@@ -217,6 +217,30 @@ GPU experiments. Run them only with their required idle GPUs and the pinned
 runtime. Changing a backend can change numerical behavior: B12X's dense path
 uses FP8 activations, while the compared Marlin path used BF16 activations.
 
+## Optional DSpark speculative decoding
+
+The [DSpark pipeline-parallel fork](https://github.com/ressl/vllm/blob/dspark-pipeline-parallel/docs/features/speculative_decoding/dspark_pipeline_parallel.md)
+adds speculative decoding to this TP2/PP3 layout. A six-GPU qualification on
+2026-09-14 measured the following with 1,024 input and 1,024 output tokens,
+independent request cache salts, and all six GPUs at 600 W:
+
+| Metric | Target-only baseline | DSpark |
+| --- | ---: | ---: |
+| Single-stream decode | 103.8 tokens/s | 285.5 tokens/s (+175%) |
+| 24-request aggregate output | 494.2 tokens/s | 725.6 tokens/s (+47%) |
+
+The final runtime passed an exact 1,048,576-token input-plus-output check,
+native vision, reasoning, tool roundtrips, structured JSON output, streaming
+cancellation and recovery. The 24-request limit still shares one KV pool;
+it does not imply 24 simultaneous full-context requests. Broad quality parity,
+bitwise output reproducibility and a long-duration DSpark soak were not established.
+
+Follow the fork's pinned overlay build and configuration: five draft tokens,
+static verification, a 2 GiB KV allocation per worker and decode graph sizes
+up to 144. These changes are **not enabled by this repository's launcher or
+profiles**. The fork includes machine-readable results and additional acceptance
+checks. Requalify a locally built runtime before adopting it.
+
 ## Known limits
 
 - The final full-context run sampled as little as **375 MiB free VRAM**. It had
@@ -228,8 +252,8 @@ uses FP8 activations, while the compared Marlin path used BF16 activations.
   0.166 s baseline. A focused recheck measured 0.239 s. Long-prompt TTFT improved.
 - Concurrency consumes a shared cache budget. Allowing 24 active requests does
   not provide 24 independent 1M contexts. The vision profile has separate
-  [bounded qualification](benchmarks/vision.md); speculative decoding and other
-  GPU counts remain unqualified.
+  [bounded qualification](benchmarks/vision.md); DSpark has the separate
+  qualification above. Other GPU counts remain unqualified.
 - A changed driver, power cap, PCIe placement, dependency or kernel can change
   both speed and memory behavior. Re-run correctness and full-context checks
   before accepting new benchmark results.
