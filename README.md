@@ -21,6 +21,13 @@ before choosing the profile. A separate [native vision profile](recipes/deepseek
 now supports up to four images per request while retaining the same KV pool
 and 1M context limit.
 
+An optional [DSpark pipeline-parallel fork](https://github.com/ressl/vllm/blob/dspark-pipeline-parallel/docs/features/speculative_decoding/dspark_pipeline_parallel.md)
+was qualified on the same six-GPU layout on 2026-09-14. With 1K input and 1K
+output tokens, it measured **286 decode tokens/s for one stream** (versus 104)
+and **726 aggregate output tokens/s at 24 concurrent requests** (versus 494).
+The fork documents its separate build, settings, tests and limitations; the
+profiles in this repository still describe the target-only runtime.
+
 ## Start here
 
 1. Open the model recipe and check its hardware, memory and topology requirements.
