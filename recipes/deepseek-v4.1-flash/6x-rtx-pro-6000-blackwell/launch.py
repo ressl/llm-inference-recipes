@@ -31,9 +31,10 @@ def docker_command(args):
         raise ValueError("Docker bind paths cannot contain commas or newlines")
     if model == cache or model in cache.parents or cache in model.parents:
         raise ValueError("Model and writable cache paths must be separate directories")
-    profiles = {"single": "profile.json", "parallel": "profile-parallel.json", "vision": "profile-vision.json"}
+    profiles = {"single": "profile.json", "parallel": "profile-parallel.json",
+                "vision": "profile-vision.json", "fp4": "profile-fp4.json"}
     if args.profile not in profiles:
-        raise ValueError("Choose the single, parallel or vision profile")
+        raise ValueError("Choose the single, parallel, vision or fp4 profile")
     profile = json.loads((HERE / profiles[args.profile]).read_text())
     selected = ",".join(uuids)
     cmd = ["docker", "run", "--detach", "--init", "--name", args.name,
@@ -48,7 +49,10 @@ def docker_command(args):
            "CUDA_VISIBLE_DEVICES": selected, "NVIDIA_DRIVER_CAPABILITIES": "compute,utility"}
     for key, value in env.items():
         cmd += ["--env", f"{key}={value}"]
-    return cmd + [args.image] + profile["args"], cache
+    image = args.image or ("llm-inference-recipes/deepseek-v41:2026-09-16-fp4"
+                           if args.profile == "fp4" else
+                           "llm-inference-recipes/deepseek-v41:2026-09-12-vision")
+    return cmd + [image] + profile["args"], cache
 
 
 def main():
@@ -56,8 +60,8 @@ def main():
     parser.add_argument("--gpus", required=True, help="Six full GPU UUIDs in TP-pair order")
     parser.add_argument("--model-dir", required=True)
     parser.add_argument("--cache-dir", required=True)
-    parser.add_argument("--profile", choices=("single", "parallel", "vision"), default="single")
-    parser.add_argument("--image", default="llm-inference-recipes/deepseek-v41:2026-09-12-vision")
+    parser.add_argument("--profile", choices=("single", "parallel", "vision", "fp4"), default="single")
+    parser.add_argument("--image", help="Override the image tag selected for the profile")
     parser.add_argument("--name", default="deepseek-v41-recipe")
     parser.add_argument("--port", type=int, default=30000)
     parser.add_argument("--dry-run", action="store_true")
