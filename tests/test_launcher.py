@@ -73,6 +73,18 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual("weights", vision[vision.index("--mm-encoder-tp-mode") + 1])
             self.assertEqual("24", vision[vision.index("--max-num-seqs") + 1])
             self.assertEqual("1932735283", vision[vision.index("--kv-cache-memory-bytes") + 1])
+            args.profile = "fp4"
+            args.image = None
+            fp4, _ = launch.docker_command(args)
+            self.assertIn("llm-inference-recipes/deepseek-v41:2026-09-16-fp4", fp4)
+            self.assertIn("RECIPE_DSV41_FP4_CACHE=1", fp4)
+            self.assertIn("VLLM_PLUGINS=", fp4)
+            self.assertNotIn("--speculative-config", fp4)
+            self.assertEqual({"image": 16}, json.loads(fp4[fp4.index("--limit-mm-per-prompt") + 1]))
+            self.assertEqual("24", fp4[fp4.index("--max-num-seqs") + 1])
+            self.assertEqual("1932735283", fp4[fp4.index("--kv-cache-memory-bytes") + 1])
+            args.image = "custom:qualified"
+            self.assertIn("custom:qualified", launch.docker_command(args)[0])
             args.profile = "../profile"
             with self.assertRaises(ValueError):
                 launch.docker_command(args)

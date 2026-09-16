@@ -1,10 +1,18 @@
 # DeepSeek V4.1 Flash on six RTX PRO 6000 Blackwell GPUs
 
-Three profiles for six 96 GB cards with PCIe x16 links: `single` allows one
+Four profiles for six 96 GB cards with PCIe x16 links: `single` allows one
 active text request, `parallel` allows up to **24 active text requests**, and
-`vision` adds native image input with the same 24-request limit. All keep
-a **1,048,576-token per-request limit** and share the same fixed KV allocation.
+`vision` adds native image input with the same 24-request limit. The new `fp4`
+profile adds compact native NVFP4/FP8 cache and a 16-image request limit.
+All keep a **1,048,576-token per-request limit** and the same fixed KV byte budget.
 Weights and Engram remain on the GPUs; CPU weight offload is disabled.
+
+**September 16 update:** the target-only FP4 runtime passed two independent full
+1M contexts and four independent 512K contexts, including output, with overlapping
+decode and zero preemptions. Capacity is 2.10M token equivalents versus 1.16M
+before. See the [FP4 build instructions, measurements and limits](benchmarks/fp4-cache.md).
+DSpark was disabled after reported intermittent problems; causation remains
+unconfirmed. FP4 with DSpark is not supported by this adapter.
 
 The parallel profile passes **24 independent 32K**, **eight independent 128K**
 and **four independent 256K** input contexts, with 1,024 output tokens per stream.
@@ -123,11 +131,18 @@ docker rm deepseek-v41-recipe
 
 The complete contracts are [profile.json](profile.json) for `single`,
 [profile-parallel.json](profile-parallel.json) for `parallel`, and
-[profile-vision.json](profile-vision.json) for `vision`. The launcher defaults
+[profile-vision.json](profile-vision.json) for `vision`, plus
+[profile-fp4.json](profile-fp4.json) for `fp4`. The launcher defaults
 to `single`; add `--profile parallel` to the launch or dry-run command to select
 24 active requests, or `--profile vision` for text plus up to four images per
 request including history. See [vision qualification](benchmarks/vision.md).
+For `fp4`, build with `--build-arg ENABLE_FP4_CACHE=1` and select `--profile fp4`;
+the [FP4 guide](benchmarks/fp4-cache.md) provides complete commands and checks.
 Run one profile at a time on the same six GPUs.
+
+The following table describes the legacy profiles. The FP4 guide lists the
+new B12X pin, cache geometry and qualification; other model/parallel settings
+remain the same.
 
 | Setting | Value / reason |
 | --- | --- |

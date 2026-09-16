@@ -1,5 +1,9 @@
 # Concurrent DeepSeek V4.1 Flash on six Blackwell GPUs
 
+> Historical September 12 FP8-cache results. The September 16
+> [FP4 profile](fp4-cache.md) raises the same byte budget to 2.10M token
+> equivalents and passes 2×1M / 4×512K independent-context tests.
+
 The parallel profile keeps the original checkpoint, TP2 × PP3 partition
 `8,12,20`, FP8 KV allocation of 1.8 GiB per worker, 1,536-token prefill chunks,
 B12X kernels and FlashInfer PCIe IPC. It raises the active-request limit to 24

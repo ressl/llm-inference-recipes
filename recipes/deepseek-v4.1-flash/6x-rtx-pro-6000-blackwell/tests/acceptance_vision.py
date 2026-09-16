@@ -19,6 +19,7 @@ p.add_argument('--url', default='http://127.0.0.1:30000')
 p.add_argument('--output', required=True)
 p.add_argument('--expect-disabled', action='store_true')
 p.add_argument('--concurrency', type=int, default=8)
+p.add_argument('--image-limit', type=int, default=4)
 a = p.parse_args()
 model = 'deepseek-ai/DeepSeek-V4.1-Flash'
 results = []
@@ -99,8 +100,8 @@ text = multiple['response']['choices'][0]['message']['content']
 positions = [text.find(c) for c in codes]
 assert all(i >= 0 for i in positions) and positions == sorted(positions), text
 
-rejected = chat([user('Beschreibe diese Bilder.', [*images, image])])
-record('five_images_rejected', rejected)
+rejected = chat([user('Beschreibe diese Bilder.', [image] * (a.image_limit + 1))])
+record('image_limit_rejected', rejected)
 assert rejected['status'] == 400, rejected
 
 

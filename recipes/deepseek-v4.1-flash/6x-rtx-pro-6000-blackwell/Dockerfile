@@ -27,8 +27,17 @@ RUN python3 /opt/recipe/apply_runtime_patches.py
 COPY --chmod=755 entrypoint.sh /opt/recipe/
 COPY gpu_preflight.py healthcheck.py profile*.json /opt/recipe/
 COPY warmup.py /opt/recipe/warmup.py
-RUN python3 -m pip install --no-deps \
-    'https://files.pythonhosted.org/packages/d2/bc/f28f6b3ade2522785f57caaebb2b02e35e7f189e647f47b0da8e7f581e36/b12x-1.3.0-py3-none-any.whl#sha256=c97d88635521a7fdd4f67717c1835a017d0dcea49d49cc7aa5b4299f290d19e3'
+COPY patches/b12x_fp4.py patches/apply_fp4_patches.py /opt/recipe/
+ARG ENABLE_FP4_CACHE=0
+RUN if [ "$ENABLE_FP4_CACHE" = 0 ]; then \
+      python3 -m pip install --no-deps \
+        'https://files.pythonhosted.org/packages/d2/bc/f28f6b3ade2522785f57caaebb2b02e35e7f189e647f47b0da8e7f581e36/b12x-1.3.0-py3-none-any.whl#sha256=c97d88635521a7fdd4f67717c1835a017d0dcea49d49cc7aa5b4299f290d19e3'; \
+    elif [ "$ENABLE_FP4_CACHE" = 1 ]; then \
+      python3 -m pip install --no-deps --no-build-isolation --force-reinstall \
+        'https://github.com/local-inference-lab/b12x/archive/38ae4b6cc1cde0f04d6ac45b7367004c12d1c53e.tar.gz' \
+      && python3 /opt/recipe/apply_fp4_patches.py \
+      && touch /opt/recipe/fp4-enabled; \
+    else echo "ENABLE_FP4_CACHE must be 0 or 1" >&2; exit 1; fi
 COPY tests /opt/recipe/tests
 COPY benchmarks/*.py /opt/recipe/benchmarks/
 USER 1000:1000

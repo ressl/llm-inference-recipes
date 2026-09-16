@@ -1,0 +1,152 @@
+{
+  "date": "2026-09-16",
+  "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "model_revision": "dba1be0a40aa45a94ad051997016db3960a90277",
+  "hardware": "6 x RTX PRO 6000 Blackwell 96 GB, PCIe x16",
+  "tensor_parallel_size": 2,
+  "pipeline_parallel_size": 3,
+  "layer_partition": [
+    8,
+    12,
+    20
+  ],
+  "dspark_enabled": false,
+  "b12x_revision": "38ae4b6cc1cde0f04d6ac45b7367004c12d1c53e",
+  "cache_bytes_per_worker": 1932735283,
+  "previous_token_capacity": 1164421,
+  "token_capacity": 2101450,
+  "blocks": 57195,
+  "worker_stride_bytes": 33792,
+  "max_num_seqs": 24,
+  "max_num_batched_tokens": 1536,
+  "image_limit_per_request": 16,
+  "cache_records_bytes": {
+    "main_nvfp4": 288,
+    "swa_fp8": 528,
+    "indexer_fp8": 132
+  },
+  "tests": [
+    {
+      "sessions": 2,
+      "context_tokens_per_session": 131072,
+      "overlapping_decode_seconds": 29.053444147109985,
+      "prefixes": "independent unique first lines",
+      "preemptions": 0,
+      "sessions_detail": [
+        {
+          "session": 0,
+          "prompt_tokens": 129024,
+          "completion_tokens": 2048,
+          "total_tokens": 131072,
+          "time_to_first_visible_token_seconds": 37.92591309547424,
+          "total_seconds": 67.28783011436462,
+          "recall_passed": true,
+          "stream_done": true
+        },
+        {
+          "session": 1,
+          "prompt_tokens": 129024,
+          "completion_tokens": 2048,
+          "total_tokens": 131072,
+          "time_to_first_visible_token_seconds": 16.57263684272766,
+          "total_seconds": 66.97624373435974,
+          "recall_passed": true,
+          "stream_done": true
+        }
+      ]
+    },
+    {
+      "sessions": 2,
+      "context_tokens_per_session": 1048576,
+      "overlapping_decode_seconds": 23.35016417503357,
+      "prefixes": "independent unique first lines",
+      "preemptions": 0,
+      "sessions_detail": [
+        {
+          "session": 0,
+          "prompt_tokens": 1046528,
+          "completion_tokens": 2048,
+          "total_tokens": 1048576,
+          "time_to_first_visible_token_seconds": 440.29692697525024,
+          "total_seconds": 466.1254811286926,
+          "recall_passed": true,
+          "stream_done": true
+        },
+        {
+          "session": 1,
+          "prompt_tokens": 1046528,
+          "completion_tokens": 2048,
+          "total_tokens": 1048576,
+          "time_to_first_visible_token_seconds": 198.78939986228943,
+          "total_seconds": 463.62062096595764,
+          "recall_passed": true,
+          "stream_done": true
+        }
+      ]
+    },
+    {
+      "sessions": 4,
+      "context_tokens_per_session": 524288,
+      "overlapping_decode_seconds": 31.337515115737915,
+      "prefixes": "independent unique first lines",
+      "preemptions": 0,
+      "sessions_detail": [
+        {
+          "session": 0,
+          "prompt_tokens": 522240,
+          "completion_tokens": 2048,
+          "total_tokens": 524288,
+          "time_to_first_visible_token_seconds": 357.87708806991577,
+          "total_seconds": 532.4905321598053,
+          "recall_passed": true,
+          "stream_done": true
+        },
+        {
+          "session": 1,
+          "prompt_tokens": 522240,
+          "completion_tokens": 2048,
+          "total_tokens": 524288,
+          "time_to_first_visible_token_seconds": 99.45804905891418,
+          "total_seconds": 529.1998801231384,
+          "recall_passed": true,
+          "stream_done": true
+        },
+        {
+          "session": 2,
+          "prompt_tokens": 522240,
+          "completion_tokens": 2048,
+          "total_tokens": 524288,
+          "time_to_first_visible_token_seconds": 497.85278511047363,
+          "total_seconds": 533.7269201278687,
+          "recall_passed": true,
+          "stream_done": true
+        },
+        {
+          "session": 3,
+          "prompt_tokens": 522240,
+          "completion_tokens": 2048,
+          "total_tokens": 524288,
+          "time_to_first_visible_token_seconds": 218.5798590183258,
+          "total_seconds": 531.1160311698914,
+          "recall_passed": true,
+          "stream_done": true
+        }
+      ]
+    }
+  ],
+  "min_free_vram_mib_during_2x1m_by_pipeline_stage": [
+    [
+      13743,
+      13723
+    ],
+    [
+      475,
+      395
+    ],
+    [
+      19621,
+      19621
+    ]
+  ],
+  "qualification_scope": "Real checkpoint and deployed adapter qualified on six GPUs; public Docker packaging has separate build/CPU checks, not a fresh full-model GPU launch. Forced generation after EOS tests capacity and synthetic recall, not natural response throughput or broad quality parity."
+}

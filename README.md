@@ -9,24 +9,30 @@ can be added without changing the scope of the project.
 
 | Model | Hardware | Backend | Measured result |
 | --- | --- | --- | --- |
-| [DeepSeek V4.1 Flash](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/README.md) | 6 × RTX PRO 6000 Blackwell 96 GB, PCIe x16 | Patched, pinned vLLM; TP2 × PP3 | 24 independent 32K requests active together; approximately 104 decode tokens/s for one stream; 1M per-request context limit with a shared KV pool |
+| [DeepSeek V4.1 Flash](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/README.md) | 6 × RTX PRO 6000 Blackwell 96 GB, PCIe x16 | Patched, pinned vLLM; TP2 × PP3 | Native FP4 cache: 2 × full 1M or 4 × 512K contexts with overlapping decode; 1M per-request limit, shared cache pool |
 
-The first recipe keeps weights and Engram on the GPUs. Its parallel profile also
-passes eight independent 128K histories and four independent 256K histories.
-A single full-context check used 1,048,448 input tokens plus 128 output tokens
-and completed in 172 seconds with the 24-request limit enabled.
-These are measurements from one six-GPU system, not a throughput or quality
-guarantee. Read the [concurrency results and limits](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/concurrency.md)
-before choosing the profile. A separate [native vision profile](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/vision.md)
-now supports up to four images per request while retaining the same KV pool
-and 1M context limit.
+The September 16 [FP4 profile and measurements](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/fp4-cache.md)
+increase cache capacity from **1.16M to 2.10M tokens (+80%)** at the same
+1.8 GiB per-worker budget. Two independent full 1M contexts and four independent
+512K contexts passed recall and overlapping-decode tests. Context sizes include
+input and output. The profile retains native vision with a 16-image request
+limit and runs **without DSpark**. Public build/CPU checks are separate from
+the deployed runtime's six-GPU full-model qualification.
+
+Weights and Engram stay on the GPUs. The earlier profiles and measurements
+remain available: [concurrency](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/concurrency.md),
+[native vision](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/vision.md)
+and [single-request tuning](recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/benchmarks/README.md).
+Results are from one six-GPU system, not a throughput or quality guarantee.
 
 An optional [DSpark pipeline-parallel fork](https://github.com/ressl/vllm/blob/dspark-pipeline-parallel/docs/features/speculative_decoding/dspark_pipeline_parallel.md)
-was qualified on the same six-GPU layout on 2026-09-14. With 1K input and 1K
-output tokens, it measured **286 decode tokens/s for one stream** (versus 104)
-and **726 aggregate output tokens/s at 24 concurrent requests** (versus 494).
-The fork documents its separate build, settings, tests and limitations; the
-profiles in this repository still describe the target-only runtime.
+passed the documented tests on September 14. With 1K input and 1K output, it
+measured 286 decode tokens/s for one stream and 726 aggregate output tokens/s
+at 24 requests. On September 16 it was disabled after the operator reported
+suspected intermittent issues. A DSpark-specific root cause has **not** been
+established. Those speed measurements remain historical, not a long-term
+stability guarantee. The FP4 adapter rejects speculation; FP4 plus DSpark
+has not been qualified.
 
 ## Start here
 

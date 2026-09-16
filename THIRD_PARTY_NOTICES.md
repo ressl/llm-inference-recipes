@@ -9,13 +9,16 @@ does not replace those notices.
 | --- | --- | --- |
 | vLLM | Public `vllm/vllm-openai` image pinned in the recipe; package `0.1.dev20904+g179dd0fa9` | Apache-2.0; [license](licenses/vLLM-Apache-2.0.txt) |
 | FlashInfer | [c05407ceffb7d9ce111a73553a8e37ad752adb62](https://github.com/flashinfer-ai/flashinfer/tree/c05407ceffb7d9ce111a73553a8e37ad752adb62) | Apache-2.0 and the additional notices in its [LICENSE](licenses/FlashInfer-LICENSE.txt) |
-| B12X | [1.3.0](https://pypi.org/project/b12x/1.3.0/) | Apache-2.0; [license from the wheel](licenses/B12X-LICENSE.txt) |
+| B12X | [1.3.0](https://pypi.org/project/b12x/1.3.0/) for legacy profiles; [38ae4b6](https://github.com/local-inference-lab/b12x/tree/38ae4b6cc1cde0f04d6ac45b7367004c12d1c53e) for FP4 | Apache-2.0; [license from the wheel](licenses/B12X-LICENSE.txt) |
 
 The vLLM and FlashInfer search/replacement fragments in
 `recipes/deepseek-v4.1-flash/6x-rtx-pro-6000-blackwell/patches/apply_runtime_patches.py`
 are modified upstream code. The script identifies the affected files and checks
 their original SHA-256 hashes before modification. The B12X normalization fix
-changes vLLM's B12X adapter; B12X itself is installed from its pinned wheel.
+changes vLLM's B12X adapter; B12X itself is installed from its pinned wheel or source archive. The FP4
+patch script also modifies upstream vLLM fragments under their Apache-2.0
+terms; the new adapter and qualification tooling are original contributions
+under the repository license.
 The Docker build retains dependencies' installed license files.
 
 [DeepSeek V4.1 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/tree/dba1be0a40aa45a94ad051997016db3960a90277)
